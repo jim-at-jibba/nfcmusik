@@ -1,60 +1,64 @@
 // reload list of music files and render it
 function refreshMusicFiles() {
-    $.getJSON('json/musicfiles', function(data) {
-        var fileList = $("#musicFiles");
+  $.getJSON("json/musicfiles", function(data) {
+    var fileList = $("#musicFiles");
 
-        fileList.empty();
+    fileList.empty();
 
-        $.each(data, function(i, f) {
-            var li = $('<li/>')
-                .attr('id', f.hash)
-                .addClass('musicFileItem')
-                .text(f.name + '   ')
-                .appendTo(fileList);
+    $.each(data, function(i, f) {
+      var li = $("<li/>")
+        .attr("id", f.hash)
+        .addClass("musicFileItem")
+        .text(f.name + "   ")
+        .appendTo(fileList);
 
-            var href = $('<button/>')
-                .attr('type', 'button')
-                .addClass("btn btn-default")
-                .click(function() { writeNFC(f.hash); })
-                .text('write to tag')
-                .appendTo(li);
-                        
-        });
+      var href = $("<button/>")
+        .attr("type", "button")
+        .addClass("button")
+        .click(function() {
+          writeNFC(f.hash);
+        })
+        .text("write to tag")
+        .appendTo(li);
     });
+  });
 }
-
 
 function writeNFC(data) {
-    $.getJSON('actions/writenfc?data=' + data, function(ret) {
-        setStatus(ret.message);
-    });
+  $.getJSON("actions/writenfc?data=" + data, function(ret) {
+    setStatus(ret.message);
+  });
 }
-
 
 function setStatus(status) {
-    var statusBox = $('#statusBox');
-    
-    statusBox.empty();
+  var statusBox = $("#statusBox");
 
-    $('<p/>')
-        .text('Status: ' + status)
-        .appendTo(statusBox);
+  statusBox.empty();
+
+  $("<p/>")
+    .text("Status: " + status)
+    .appendTo(statusBox);
 }
 
+function pollNFC() {
+  $.getJSON("json/readnfc", function(data) {
+    var nfcStatus = $("#nfcStatusBox");
 
-function pollNFC(){
-    $.getJSON('json/readnfc', function(data) {
+    nfcStatus.empty();
 
-        var nfcStatus = $('#nfcStatusBox');
+    $("<p/>")
+      .text(
+        "NFC Tag Status: " +
+          data["description"] +
+          " (UID:" +
+          data["uid"] +
+          ", data: " +
+          data["data"] +
+          ")"
+      )
+      .appendTo(nfcStatus);
 
-        nfcStatus.empty();
-
-        $('<p/>')
-            .text('NFC Tag Status: ' + data['description'] + ' (UID:' + data['uid'] + ', data: ' + data['data'] + ')')
-            .appendTo(nfcStatus);
-
-        // poll again in 1 sec
-        setTimeout(pollNFC, 1000);
-    });
+    // poll again in 1 sec
+    setTimeout(pollNFC, 1000);
+  });
 }
-
